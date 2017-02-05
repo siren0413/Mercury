@@ -7,4 +7,5 @@ if __name__ == '__main__':
     # r = mercury.initrinioTags('T','income_statement')
     # r = mercury.intrinioFinancials('T', sequence=1, item='totalrevenue', statement='income_statement',type='FY')
     r = mercury.financials(['AAPL', 'T', 'INTC', 'EA', 'ATVI', 'NVDA'], sequence=0, item='totalrevenue')
+
     print('done')

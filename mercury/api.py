@@ -11,7 +11,9 @@ def financials(identifiers, sequence=-1, type='FY', item='marketcap'):
         sub_result = dict()
         for statement in statements:
             current = initrinioTags(identifier, statement)
-            for tag_dict in current.data:
+            if not current:
+                break
+            for tag_dict in current['data']:
                 if tag_dict['tag'] == item:
                     sub_result['tag'] = tag_dict
                     break
@@ -27,10 +29,9 @@ def financials(identifiers, sequence=-1, type='FY', item='marketcap'):
             sub_result = future_to_subtask[future]
             try:
                 data = future.result()
-                result.append(data)
+                if data:
+                    result.append(data)
             except Exception as exc:
                 print('%r generated an exception: %s' % (sub_result, exc))
-            else:
-                print('%r page is %d bytes' % (sub_result, len(data)))
 
     print(result)
