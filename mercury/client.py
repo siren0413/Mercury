@@ -11,12 +11,14 @@ def getSession():
     session.auth = (username, password)
     return session
 
+
 @cache('Financials')
 def get_financials(identifier, sequence, type, statement):
     url = parse.urljoin(intrinio_host, intrinio_financials_endpoint)
     session = getSession()
     response = session.get(url, params={'identifier': identifier, 'sequence': sequence, 'type': type,
                                         'statement': statement})
+    logging.info('Request: %s, status: %d' % (url, response.status_code))
     result = dict()
     if response.status_code == 200:
         result['type'] = type
@@ -39,6 +41,7 @@ def get_fundamentals(identifier, sequence, type, statement):
     session = getSession()
     response = session.get(url, params={'identifier': identifier, 'sequence': sequence, 'type': type,
                                         'statement': statement})
+    logging.info('Request: %s, status: %d' % (url, response.status_code))
     result = dict()
     if response.status_code == 200:
         result['type'] = type
@@ -56,6 +59,7 @@ def get_datapoint(identifier, item):
     url = parse.urljoin(intrinio_host, intrinio_datapoint_endpoint)
     session = getSession()
     response = session.get(url, params={'identifier': identifier, 'item': item})
+    logging.info('Request: %s, status: %d' % (url, response.status_code))
     result = dict()
     if response.status_code == 200:
         obj = response.json()
@@ -66,11 +70,13 @@ def get_datapoint(identifier, item):
         logging.error(response.text)
     return result
 
+
 @cache('Tags')
 def initrinioTags(identifier, statement):
     url = parse.urljoin(intrinio_host, intrinio_tags_endpoint)
     session = getSession()
     response = session.get(url, params={'identifier': identifier, 'statement': statement})
+    logging.info('Request: %s, status: %d' % (url, response.status_code))
     result = dict()
     if response.status_code == 200:
         result['identifier'] = identifier
@@ -85,7 +91,7 @@ def intrinioFinancials(identifier, sequence, item, statement, type):
     result = dict()
     if sequence == -1:
         datapoint = get_datapoint(identifier, item)
-        if datapoint:
+        if datapoint and datapoint['value']:
             result['identifier'] = identifier
             result['item'] = item
             result['value'] = datapoint['value']
@@ -102,7 +108,7 @@ def intrinioFinancials(identifier, sequence, item, statement, type):
     financials = get_financials(identifier, sequence, type, statement)
     fundamentals = get_fundamentals(identifier, sequence, type, statement)
 
-    if financials and fundamentals:
+    if fundamentals and financials and financials['data'] and item in financials['data']:
         result['type'] = type
         result['sequence'] = sequence
         result['statement'] = statement

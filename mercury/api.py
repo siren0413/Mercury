@@ -1,6 +1,7 @@
 from .client import initrinioTags, intrinioFinancials
 from .settings import *
 import concurrent.futures as cf
+import logging
 
 
 def financials(identifiers, sequence=-1, type='FY', item='marketcap'):
@@ -19,12 +20,14 @@ def financials(identifiers, sequence=-1, type='FY', item='marketcap'):
                     break
             if sub_result:
                 data = intrinioFinancials(identifier, sequence, item, statement, type)
-                sub_result['data'] = data
-                break
+                if data:
+                    sub_result['data'] = data
+                    break
+            sub_result.clear()
         return sub_result
 
     with cf.ThreadPoolExecutor(max_workers=10) as executor:
-        future_to_subtask = {executor.submit(sub_task,identifier): identifier for identifier in identifiers}
+        future_to_subtask = {executor.submit(sub_task, identifier): identifier for identifier in identifiers}
         for future in cf.as_completed(future_to_subtask):
             sub_result = future_to_subtask[future]
             try:
@@ -32,6 +35,5 @@ def financials(identifiers, sequence=-1, type='FY', item='marketcap'):
                 if data:
                     result.append(data)
             except Exception as exc:
-                print('%r generated an exception: %s' % (sub_result, exc))
-
-    print(result)
+                logging.error('Unable to get [%s]: %s' % (sub_result, exc))
+    return result
