@@ -6,10 +6,10 @@ if __name__ == '__main__':
     # r = mercury.intrinioFinancials('T', sequence=-1, item='totalrevenue')
     # r = mercury.initrinioTags('T','income_statement')
     # r = mercury.intrinioFinancials('T', sequence=1, item='totalrevenue', statement='income_statement',type='FY')
-    items = ['totalrevenue','operatingcostofrevenue','depreciationexpense','investedcapitalincreasedecrease','ebit','netincome','operatingrevenue']
+    items = ['dividend']
 
     for item in items:
-        r = mercury.financials(['AAPL', 'T', 'INTC', 'EA', 'ATVI', 'NVDA', 'GOOG', 'TWTR'], sequence=0, item=item)
+        r = mercury.financials(['AAPL', 'T', 'INTC', 'EA', 'ATVI', 'NVDA', 'GOOG', 'TWTR'], sequence=-1, item=item)
         print(r)
 
     print('done')

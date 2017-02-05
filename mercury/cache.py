@@ -1,7 +1,6 @@
 import redis
-import ast
-import hiredis
 import json
+from .settings import *
 
 class Redis:
     class __Redis:
@@ -23,7 +22,7 @@ class Redis:
 
     def get_redis(self):
         if Redis.pool is None:
-            Redis.pool = redis.ConnectionPool(host='localhost', port=6379, db=0, decode_responses=True)
+            Redis.pool = redis.ConnectionPool(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True)
         return redis.StrictRedis(connection_pool=Redis.pool, decode_responses=True, charset='utf8')
 
 
