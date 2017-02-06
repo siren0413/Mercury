@@ -16,9 +16,10 @@ def getSession():
 def get_financials(identifier, sequence, type, statement):
     url = parse.urljoin(intrinio_host, intrinio_financials_endpoint)
     session = getSession()
-    response = session.get(url, params={'identifier': identifier, 'sequence': sequence, 'type': type,
-                                        'statement': statement})
-    logging.info('Request: %s, status: %d' % (url, response.status_code))
+    params = {'identifier': identifier, 'sequence': sequence, 'type': type,
+                                        'statement': statement}
+    response = session.get(url, params=params)
+    logging.info('Request: %s, params: %s ,status: %d' % (url, params, response.status_code))
     result = dict()
     if response.status_code == 200:
         result['type'] = type
@@ -27,11 +28,13 @@ def get_financials(identifier, sequence, type, statement):
         result['identifier'] = identifier
         obj = response.json()['data']
         data = dict()
-        for tag_value_dict in obj:
-            data[tag_value_dict['tag']] = tag_value_dict['value']
+        if obj:
+            for tag_value_dict in obj:
+                data[tag_value_dict['tag']] = tag_value_dict['value']
         result['data'] = data
     else:
         logging.error(response.text)
+        raise IOError('external call error with status code: %d, msg: %s' % (response.status_code, response.text))
     return result
 
 
@@ -51,6 +54,7 @@ def get_fundamentals(identifier, sequence, type, statement):
         result['data'] = response.json()['data']
     else:
         logging.error(response.text)
+        raise IOError('external call error with status code: %d, msg: %s' % (response.status_code, response.text))
     return result
 
 
@@ -68,6 +72,7 @@ def get_datapoint(identifier, item):
         result['value'] = obj['value']
     else:
         logging.error(response.text)
+        raise IOError('external call error with status code: %d, msg: %s' % (response.status_code, response.text))
     return result
 
 
@@ -83,7 +88,7 @@ def initrinioTags(identifier, statement):
         result['statement'] = statement
         result['data'] = response.json()['data']
     else:
-        logging.error(response.text)
+        raise IOError('external call error with status code: %d, msg: %s' % (response.status_code, response.text))
     return result
 
 
