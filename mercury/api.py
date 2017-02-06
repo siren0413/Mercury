@@ -2,6 +2,7 @@ from .client import initrinioTags, intrinioFinancials
 from .settings import *
 import concurrent.futures as cf
 import logging
+import copy
 
 
 def financials_by_item(identifiers, sequence=-1, type='FY', item='marketcap'):
@@ -58,17 +59,18 @@ def financials_by_identifier(identifier, items, sequence=-1, type='FY'):
     return result
 
 
-def tag_lookup(identifier, tag):
+def tag_lookup(tag):
     statements = [INCOME_STATEMENT, BALANCE_SHEET, CASH_FLOW_STATEMENT, CALCULATIONS, CURRENT]
     for statement in statements:
         try:
-            tags = initrinioTags(identifier, statement)
+            tags = initrinioTags(statement)
         except IOError as e:
             logging.error('io error. %s' % e)
             return
-        for tag_dict in tags['data']:
-            if tag_dict['tag'] == tag:
-                return tag_dict
+        if tags:
+            for tag_dict in tags['data']:
+                if tag_dict['tag'] == tag:
+                    return tag_dict
 
 
 def get_financials(identifiers, items, sequence=-1, type='FY'):
@@ -83,3 +85,18 @@ def get_financials(identifiers, items, sequence=-1, type='FY'):
                 data_list.append(None)
         result[identifier] = data_list
     return result
+
+
+def translate_and_rounding(tags, datas):
+    translated_tags = []
+    rounding_datas = copy.deepcopy(datas)
+    for i in range(len(tags)):
+        tag = tags[i]
+        tag_dict = tag_lookup(tag)
+        tag_name = tag_dict['name']
+        tag_units = tag_dict['units']
+        translated_tags.append(tag_name)
+        for identifier, data_list in rounding_datas.items():
+            if tag_units == 'usd':
+                data_list[i] /= 1000000
+    return translated_tags, rounding_datas

@@ -77,14 +77,13 @@ def get_datapoint(identifier, item):
 
 
 @cache('Tags')
-def initrinioTags(identifier, statement):
+def initrinioTags(statement):
     url = parse.urljoin(intrinio_host, intrinio_tags_endpoint)
     session = getSession()
-    response = session.get(url, params={'identifier': identifier, 'statement': statement})
+    response = session.get(url, params={'statement': statement})
     logging.info('Request: %s, status: %d' % (url, response.status_code))
     result = dict()
     if response.status_code == 200:
-        result['identifier'] = identifier
         result['statement'] = statement
         result['data'] = response.json()['data']
     else:
