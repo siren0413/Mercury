@@ -21,5 +21,6 @@ if __name__ == '__main__':
 
     symbols = ['EA', 'ATVI']
     items = ['marketcap', 'pricetoearnings']
-    result = mercury.get_financials(symbols, items, sequence=4, type='FY')
+    result = mercury.get_financials(symbols, items, sequence=1, type='FY')
+    print(result)
     tags, datas = mercury.translate_and_rounding(items, result)

@@ -98,5 +98,6 @@ def translate_and_rounding(tags, datas):
         translated_tags.append(tag_name)
         for identifier, data_list in rounding_datas.items():
             if tag_units == 'usd':
-                data_list[i] /= 1000000
+                if data_list[i]:
+                    data_list[i] /= 1000000
     return translated_tags, rounding_datas

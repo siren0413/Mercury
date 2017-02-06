@@ -1,6 +1,7 @@
 import redis
 import json
 from .settings import *
+import threading
 
 class Redis:
     class __Redis:
@@ -25,6 +26,7 @@ class Redis:
             Redis.pool = redis.ConnectionPool(host=REDIS_HOST, port=REDIS_PORT, db=REDIS_DB, decode_responses=True)
         return redis.StrictRedis(connection_pool=Redis.pool, decode_responses=True, charset='utf8')
 
+lock = threading.Lock()
 
 def cache(*argument):
     def decorate(func):
@@ -32,14 +34,15 @@ def cache(*argument):
         r = redis.get_redis()
         def wrapper(*args):
             key = ':'.join(str(x) for x in (argument + args))
-            value = r.get(key)
-            if value:
-                return json.loads(value)
-            else:
-                obj = func(*args)
-                if obj:
-                    value = json.dumps(obj)
-                    r.set(key, value)
-                return obj
+            with lock:
+                value = r.get(key)
+                if value:
+                    return json.loads(value)
+                else:
+                    obj = func(*args)
+                    if obj:
+                        value = json.dumps(obj)
+                        r.set(key, value)
+                    return obj
         return wrapper
     return decorate
